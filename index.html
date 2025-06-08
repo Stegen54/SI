@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders Mobile</title>
+    <link rel="stylesheet" href="styles.css">
+       
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-info">
+            <div>Score: <span id="score">0</span></div>
+            <div>Level: <span id="level">1</span></div>
+            <div>Lives: <span id="lives">3</span></div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="desktop-controls">
+            <strong>Controls:</strong> Arrow Keys: Move | Spacebar: Shoot
+        </div>
+        
+        <div class="mobile-controls">
+            <div class="movement-controls">
+                <div class="control-btn" id="leftBtn">←</div>
+                <div class="control-btn" id="rightBtn">→</div>
+            </div>
+            <div class="control-btn fire-btn" id="fireBtn">🔥</div>
+        </div>
+    </div>
+    
+    <div class="instructions-toggle" id="instructionsToggle">?</div>
+    
+    <div class="instructions" id="instructions">
+        <div class="instructions-content">
+            <div class="close-instructions" id="closeInstructions">×</div>
+            <h3><span class="game-icon">👾</span> How to Play Space Invaders</h3>
+            <p><strong>Objective:</strong> Destroy all alien invaders before they reach Earth!</p>
+            
+            <p><strong>Controls:</strong></p>
+            <ul>
+                <li><strong>Desktop:</strong> ← → Arrow Keys: Move | Spacebar: Shoot</li>
+                <li><strong>Mobile:</strong> Touch the arrow buttons to move, fire button to shoot</li>
+            </ul>
+            
+            <p><strong>Gameplay:</strong></p>
+            <ul>
+                <li>Aliens move horizontally and drop down when they hit edges</li>
+                <li>Aliens shoot back with pink projectiles</li>
+                <li><strong>Level System:</strong> Complete waves to advance levels</li>
+                <li><strong>Alien Types:</strong> Red (10pts), Orange (20pts), Purple (30pts)</li>
+                <li>You start with 3 lives</li>
+            </ul>
+            
+            <p class="warning"><strong>⚠️ Game Over Conditions:</strong></p>
+            <ul>
+                <li><strong>Hit by alien fire:</strong> Lose a life</li>
+                <li><strong>Alien invasion:</strong> Game over if aliens reach bottom</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div id="gameOverScreen" class="game-over" style="display: none;">
+        <div class="game-over-content">
+            <h2>GAME OVER</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button onclick="startNewGame()">Start New Game</button>
+            <button onclick="toggleInstructions()">How to Play</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
