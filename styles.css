@@ -63,9 +63,12 @@ canvas {
     width: 100%;
     max-width: 800px;
     padding: 20px;
-    margin-top: auto;
     background: rgba(0, 50, 0, 0.2);
     border-top: 1px solid #00ff00;
+    position: fixed; /* Change to fixed positioning */
+    bottom: 15vh; /* Position 15% from bottom */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
 }
 
 .movement-controls {
@@ -257,32 +260,9 @@ button:hover, button:active {
 
 /* Desktop styles */
 @media (min-width: 768px) {
-.mobile-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 800px;
-    padding: 20px;
-    /* Remove margin-top: auto */
-    margin-bottom: 20px; /* Add some bottom margin */
-    background: rgba(0, 50, 0, 0.2);
-    border-top: 1px solid #00ff00;
-}
-
-/* Mobile styles */
-@media (max-width: 767px) {
     .mobile-controls {
-        position: relative;
-        bottom: 10vh; /* Position it 10% up from the bottom */
-        padding: 15px;
-        margin-bottom: 0;
+        display: none;
     }
-    
-    canvas {
-        margin-bottom: 20px; /* Add space below canvas */
-    }
-}
     
     .desktop-controls {
         display: block;
@@ -310,6 +290,7 @@ button:hover, button:active {
     canvas {
         border: 1px solid #00ff00;
         max-height: 50vh;
+        margin-bottom: 25vh; /* Add space below canvas to prevent overlap with controls */
     }
     
     .game-info {
