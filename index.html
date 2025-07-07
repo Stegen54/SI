@@ -11,8 +11,17 @@
     <meta name="google-adsense-account" content="ca-pub-4089512445108924">
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(() => {
+            navigator.serviceWorker.register('./sw.js').then((registration) => {
                 console.log('Service Worker Registered');
+                registration.active?.postMessage("notifyReady");
+            });
+
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data === "App is ready to work offline!") {
+                    const banner = document.getElementById('notificationBanner');
+                    banner.style.display = 'block';
+                    setTimeout(() => banner.style.display = 'none', 5000);
+                }
             });
         }
     </script>
@@ -85,6 +94,10 @@
             <button onclick="startNewGame()">Start New Game</button>
             <button onclick="toggleInstructions()">How to Play</button>
         </div>
+    </div>
+
+    <div id="notificationBanner" style="display: none; position: fixed; bottom: 0; width: 100%; background: #00ff00; color: #000; text-align: center; padding: 10px; z-index: 1000;">
+        App is ready to work offline!
     </div>
 
     <script src="script.js"></script>

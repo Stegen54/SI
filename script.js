@@ -187,17 +187,28 @@ let player = {
     y: 520,
     width: 50,
     height: 30,
-    speed: 5
+    speed: 5,
+    shielded: false
 };
 
 let bullets = [];
 let aliens = [];
 let alienBullets = [];
+let powerUps = [];
+const POWER_UP_DURATION = 10000; // 10 seconds
+let activePowerUp = null;
+let powerUpEndTime = 0;
 
 const BULLET_SPEED = 7;
 const ALIEN_BULLET_SPEED = 3;
 let ALIEN_SPEED = 1;
 const ALIEN_DROP_SPEED = 20;
+
+// Power-up types
+const POWER_UP_TYPES = [
+    { type: "doubleBullets", color: "#00ffff", effect: "Shoot two bullets at once" },
+    { type: "shield", color: "#ffff00", effect: "Temporary invincibility" }
+];
 
 function createAliens() {
     aliens = [];
@@ -233,6 +244,50 @@ function createAliens() {
     alienDirection = 1;
 }
 
+// Spawn power-ups randomly
+function spawnPowerUp() {
+    if (Math.random() < 0.1) { // 10% chance to spawn a power-up
+        powerUps.push({
+            x: Math.random() * (canvas.width - 30),
+            y: 0,
+            width: 30,
+            height: 30,
+            type: POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)]
+        });
+    }
+}
+
+// Apply power-up effect
+function applyPowerUp(powerUp) {
+    activePowerUp = powerUp.type;
+    powerUpEndTime = Date.now() + POWER_UP_DURATION;
+
+    if (powerUp.type === "shield") {
+        player.shielded = true;
+    }
+}
+
+// Update power-ups
+function updatePowerUps() {
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+        powerUps[i].y += 2; // Move power-ups down
+        if (powerUps[i].y > canvas.height) {
+            powerUps.splice(i, 1); // Remove power-up if it goes off-screen
+        } else if (checkCollision(powerUps[i], player)) {
+            applyPowerUp(powerUps[i].type);
+            powerUps.splice(i, 1); // Remove power-up after collection
+        }
+    }
+
+    // Handle active power-up expiration
+    if (activePowerUp && Date.now() > powerUpEndTime) {
+        if (activePowerUp === "shield") {
+            player.shielded = false;
+        }
+        activePowerUp = null;
+    }
+}
+
 // Input handling
 document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
@@ -247,6 +302,7 @@ document.addEventListener('keyup', (e) => {
     keys[e.code] = false;
 });
 
+// Modify bullet shooting for double bullets
 function shoot() {
     if (bullets.length < 3) {
         bullets.push({
@@ -255,6 +311,14 @@ function shoot() {
             width: 4,
             height: 10
         });
+        if (activePowerUp === "doubleBullets") {
+            bullets.push({
+                x: player.x + player.width / 2 + 10,
+                y: player.y,
+                width: 4,
+                height: 10
+            });
+        }
         playShootSound();
     }
 }
@@ -356,13 +420,17 @@ function update() {
     // Check collisions: alien bullets vs player
     for (let i = alienBullets.length - 1; i >= 0; i--) {
         if (checkCollision(alienBullets[i], player)) {
-            alienBullets.splice(i, 1);
-            lives--;
-            updateLives();
-            
-            if (lives <= 0) {
-                gameOver();
-                return;
+            if (!player.shielded) {
+                alienBullets.splice(i, 1);
+                lives--;
+                updateLives();
+
+                if (lives <= 0) {
+                    gameOver();
+                    return;
+                }
+            } else {
+                alienBullets.splice(i, 1); // Shield absorbs the hit
             }
         }
     }
@@ -387,15 +455,36 @@ function update() {
         }, 1000);
     }
     
+    // Update power-ups
+    updatePowerUps();
+
     alienShoot();
+}
+
+// Render power-ups
+function renderPowerUps() {
+    for (let powerUp of powerUps) {
+        ctx.fillStyle = powerUp.type.color;
+        ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
+        ctx.strokeStyle = "#ffffff";
+        ctx.strokeRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
+    }
+}
+
+// Modify player rendering for shield effect
+function renderPlayer() {
+    ctx.fillStyle = player.shielded ? "#00ffff" : "#00ff00";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+    ctx.strokeStyle = "#ffffff";
+    ctx.strokeRect(player.x, player.y, player.width, player.height);
 }
 
 function render() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    ctx.fillStyle = '#00ff00';
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    // Render player
+    renderPlayer();
     
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1;
@@ -448,11 +537,17 @@ function render() {
     for (let bullet of alienBullets) {
         ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     }
+
+    // Render power-ups
+    renderPowerUps();
 }
 
 function gameLoop() {
     update();
     render();
+    if (Math.random() < 0.01) { // Random chance to spawn a power-up
+        spawnPowerUp();
+    }
     requestAnimationFrame(gameLoop);
 }
 
@@ -488,11 +583,14 @@ function startNewGame() {
     level = 1;
     bullets = [];
     alienBullets = [];
+    powerUps = [];
     player.x = 375;
     player.y = 520;
     alienDirection = 1;
     lastAlienShot = 0;
     ALIEN_SPEED = 1;
+    activePowerUp = null;
+    powerUpEndTime = 0;
     
     createAliens();
     updateScore();

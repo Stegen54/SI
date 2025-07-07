@@ -1,4 +1,3 @@
-
 const CACHE_NAME = "space-invaders-cache-v1";
 const urlsToCache = [
     "./",
@@ -14,6 +13,8 @@ self.addEventListener("install", (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(urlsToCache);
+        }).then(() => {
+            self.skipWaiting();
         })
     );
 });
@@ -37,6 +38,18 @@ self.addEventListener("activate", (event) => {
                     }
                 })
             );
+        }).then(() => {
+            self.clients.claim();
         })
     );
+});
+
+self.addEventListener("message", (event) => {
+    if (event.data === "notifyReady") {
+        self.clients.matchAll().then((clients) => {
+            clients.forEach((client) => {
+                client.postMessage("App is ready to work offline!");
+            });
+        });
+    }
 });
